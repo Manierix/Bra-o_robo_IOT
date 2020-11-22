@@ -1,0 +1,13 @@
+O hardware utilizado no projeto foram os seguites :
+
+1 : protoboard de 600 pinos
+1 : estrutura braço robô meArm V1.0
+16 : Jumpers
+4 : Micro Servo 9g SG90 TowerPro
+1 : Fonte de 6v e 2A
+1 : Capacitor de 1000uF
+1: Módulo Esp8266 Nodemcu
+
+Abaixo segue manual de instruções para montagem das estrutura meArm v1.0
+
+https://www.instructables.com/MeArm-Robot-Arm-Your-Robot-V10/
