@@ -1,0 +1,211 @@
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <Servo.h>
+
+const char* ssid = "***"; 
+const char* password =  "***"; 
+const char* mqttServer = "***"; 
+const int mqttPort = "***"; 
+const char* mqttUser = "***"; 
+const char* mqttPassword = "***"; 
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+//defines - mapeamento de pinos do NodeMCU
+#define D0    16
+#define D1    5
+#define D2    4
+#define D3    0
+
+// define pinos dos motores
+#define pinServ1     D0
+#define pinServ2     D1
+#define pinServ3     D2
+#define pinServ4     D3
+
+// nomeia os servos
+Servo serv1,serv2,serv3,serv4;
+
+// cria as variavies dos angulos de cada motor
+int motor1,motor2,motor3,motor4;
+
+// cria variavel dos posicionamentos programados
+int posicao;
+
+//função para receber os dados MQTT
+void mqtt_callback(char* topic, byte* dados_tcp, unsigned int length);
+
+void setup() { 
+
+//Seta os servotores
+
+  serv1.attach(pinServ1);
+  serv2.attach(pinServ2);
+  serv3.attach(pinServ3);
+  serv4.attach(pinServ4);
+
+// leitura dos angulos para inicio
+  motor1 = 115;
+  motor2 = 95;
+  motor3 = 80;
+  motor4 = 90;
+  serv1.write(motor1);
+  serv2.write(motor2);
+  serv3.write(motor3);
+  serv4.write(motor4);
+
+  Serial.begin(115200);
+
+ //CONEXÃO COM WI-FI + REPETIÇÃO CASO DE NÃO CONECTAR 
+ 
+  WiFi.begin(ssid, password);
+ 
+  while (WiFi.status() != WL_CONNECTED) 
+  {   
+     delay(100);
+    Serial.println("Conectando a WiFi..");
+  }
+  Serial.println("Conectado!"); 
+
+
+  //CONEXÃO COM O SERVIDOR MQTT
+  
+  client.setServer(mqttServer, mqttPort);
+
+  //SET O CALLBACK PARA RECEBER INFORMAÇÃO DO MQTT
+  
+  client.setCallback(callback);
+
+  //REPETIÇÃO DA CONEXÃO COM O MQTT CASO NÃO CONECTE
+ 
+  while (!client.connected()) {
+    Serial.println("Conectando ao servidor MQTT...");
+    
+    if (client.connect("Projeto IOT",mqttUser,mqttPassword))
+    {
+ 
+      Serial.println("Conectado ao servidor MQTT!");  
+ 
+    } else {
+ 
+      Serial.print("Falha ao conectar ");
+      Serial.print(client.state());
+      delay(2000);
+ 
+    }
+  }
+
+ //PUBLICA MENSAGENS DE FUNCIONAMENTO AO SERVIDOR MQTT
+ 
+  client.publish("Status ","Reiniciado!");
+  client.publish("Placa","Em funcionamento!");
+  client.subscribe("MOTORES"); 
+}
+
+//FUNÇÃO PARA FUNCIONAMENTO A PARTIR DE DADOS RECEBIDOS SERVIDOR MQTT
+
+
+void callback(char* topic, byte* dados_tcp, unsigned int length) {
+    for (int i = 0; i < length; i++) {
+    //MOVIMENTA BASE PARA ESQUERDA
+  if ((char)dados_tcp[0] == 'E') {
+     motor1 = motor1 + 5; 
+     motor1 = constrain(motor1,0,180);
+     serv1.write(motor1);  
+    //MOVIMENTA BASE PARA DIREITA
+  } else if((char)dados_tcp[0] == 'D'){
+     motor1 = motor1 - 5; 
+     motor1 = constrain(motor1,0,180);
+     serv1.write(motor1);
+  }
+  //MOVIMENTA BASE PARA CIMA
+  if ((char)dados_tcp[0] == 'C') {
+    motor2 = motor2 + 5; 
+    motor2 = constrain(motor2,80,180);
+    serv2.write(motor2);  
+    //MOVIMENTA BASE PARA BAIXO
+  } else if((char)dados_tcp[0] == 'B'){
+     motor2 = motor2 - 5; 
+     motor2 = constrain(motor2,80,180);
+     serv2.write(motor2);
+  }
+  //MOVIMENTA BASE PARA FRENTE
+  if ((char)dados_tcp[0] == 'F') {
+    motor3 = motor3 + 5; 
+    motor3 = constrain(motor3,80,180);
+    serv3.write(motor3);  
+    //MOVIMENTA BASE PARA TRAS
+  } else if((char)dados_tcp[0] == 'T'){
+     motor3 = motor3 - 5; 
+     motor3 = constrain(motor3,80,180);
+     serv3.write(motor3);
+  }
+  //FECHA A GARRA
+  if ((char)dados_tcp[0] == 'P') {
+    motor4 = motor4 + 15; 
+    motor4 = constrain(motor4,90,180);
+    serv4.write(motor4);  
+    //ABRE A GARRA
+  } else if((char)dados_tcp[0] == 'A'){
+     motor4 = motor4 - 15; 
+     motor4 = constrain(motor4,90,180);
+    serv4.write(motor4);
+  }
+  //MOVIMENTO PROGRAMADO PARA SE MOVIMENTAR A UM OBJETO, PEGA-LO E COLOCA-LO EM OUTRO LOCAL.
+  if ((char)dados_tcp[0] == 'Z') {
+    for (posicao = 80; posicao <= 125; posicao += 1){
+      serv3.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 95; posicao >= 80; posicao -=  1){
+      serv2.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 90; posicao <= 170; posicao += 1){
+      serv4.write(posicao);
+      delay(10);
+    }
+    delay(500);
+     for (posicao = 80; posicao <= 120; posicao += 1){
+      serv2.write(posicao);
+      delay(10);
+    }
+    delay(500);
+     for (posicao = 115; posicao >= 35; posicao -= 1){
+      serv1.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 170; posicao >= 90; posicao -= 1){
+      serv4.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 125; posicao >= 80; posicao -= 1){
+      serv3.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 120; posicao >= 80; posicao -=  1){
+      serv2.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    for (posicao = 35; posicao <= 115; posicao += 1){
+      serv1.write(posicao);
+      delay(10);
+    }
+    delay(500);
+    }
+  }
+}
+
+
+
+void loop() {        
+     client.loop();
+ }
+
