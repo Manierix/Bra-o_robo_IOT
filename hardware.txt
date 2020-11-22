@@ -1,7 +1,7 @@
 O hardware utilizado no projeto foram os seguites :
 
 1 : protoboard de 600 pinos
-1 : estrutura braço robô meArm V1.0
+1 : estrutura braço robô meArm V1.0 de acrílico 
 16 : Jumpers
 4 : Micro Servo 9g SG90 TowerPro
 1 : Fonte de 6v e 2A
