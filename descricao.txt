@@ -1,0 +1,5 @@
+O Projeto é um braço-robô que realiza movimentos de esquerda, direita, cima, baixo, sobe, desce, fecha e abre e movimentos pré-programados.
+
+Ele funciona recebendo caracteres que são enviados do celular ou do computador, vão para o servidor MQTT e depois para a placa que transforma isso nos movimentos.
+
+Pode ser utilizada para movimentação automática de algum objeto.
