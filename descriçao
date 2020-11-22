@@ -1,0 +1,4 @@
+Descrição e funcionamento :
+O braço robô  foi desenvolvido com  a versão chamada meArm V1 , onde temos uma estrutura de um braço movimentada por 4 motores.
+O funcionamento é simples, cada motor  movimenta uma parte da estrutura  e teremos : Esquerda, direita, cima, baixo, frente , trás, fecha e abre.
+
