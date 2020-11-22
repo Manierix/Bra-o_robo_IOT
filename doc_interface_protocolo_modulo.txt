@@ -1,0 +1,7 @@
+Documentação das interfaces, protocolos e módulos de comunicação :
+
+Para realizar o projeto foi utilizado o protocolo MQTT junto ao broker CloudMQTT.
+
+A interface foi feita utilizando o aplicativo MQTT Dash para Android.
+
+O Módulo de comunicação resposável é o NodeMcu ESP8266.
